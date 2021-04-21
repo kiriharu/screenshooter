@@ -11,7 +11,9 @@ class Screenshot:
         self.settings = settings
 
     async def page(self) -> Page:
-        browser = await launch(**self.settings.dict())
+        browser = await launch(
+            options=dict(defaultViewport=self.settings.dict())
+        )
         page = await browser.newPage()
         await page.goto(self.url)
         return page

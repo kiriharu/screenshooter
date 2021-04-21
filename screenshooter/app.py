@@ -4,8 +4,8 @@ import os
 
 import sentry_sdk
 from pydantic import HttpUrl
-from fastapi import FastAPI
-from fastapi.responses import PlainTextResponse, StreamingResponse
+from fastapi import FastAPI, Query, Request
+from fastapi.responses import PlainTextResponse, StreamingResponse, Response
 from pyppeteer.errors import PageError
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
@@ -35,37 +35,29 @@ if sentry_dsn:
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 
-@app.get("/base64", response_class=PlainTextResponse)
-async def base64(
+async def screenshot_route(
+        request: Request,
         url: HttpUrl,
-        width: Optional[int] = 800,
-        height: Optional[int] = 600,
+        width: Optional[int] = Query(800, lt=2000),
+        height: Optional[int] = Query(600, lt=2000),
         isMobile: Optional[bool] = False,
         deviceScaleFactor: Optional[Union[int, float]] = 1,
         isLandscape: Optional[bool] = False,
-) -> PlainTextResponse:
+) -> Response:
+
     screenshot = Screenshot(str(url), BrowserSettings(
         width=width, height=height, isMobile=isMobile,
         deviceScaleFactor=deviceScaleFactor, isLandscape=isLandscape
     ))
-    plaintext = await screenshot.base64()
-    return PlainTextResponse(plaintext)
 
+    if request.url.path == "/base64":
+        plaintext = await screenshot.base64()
+        return PlainTextResponse(plaintext)
+    if request.url.path == "/binary":
+        binary = await screenshot.binary()
+        return StreamingResponse(content=BytesIO(binary), media_type="image/png")
 
-@app.get("/binary", response_class=StreamingResponse)
-async def file(
-        url: HttpUrl,
-        width: Optional[int] = 800,
-        height: Optional[int] = 600,
-        isMobile: Optional[bool] = False,
-        deviceScaleFactor: Optional[Union[int, float]] = 1,
-        isLandscape: Optional[bool] = False,
-) -> StreamingResponse:
-    screenshot = Screenshot(str(url), BrowserSettings(
-        width=width, height=height, isMobile=isMobile,
-        deviceScaleFactor=deviceScaleFactor, isLandscape=isLandscape
-    ))
-    binary = await screenshot.binary()
-    return StreamingResponse(content=BytesIO(binary), media_type="image/png")
 
 app.add_exception_handler(PageError, page_error_handler)
+app.add_api_route("/base64", screenshot_route, response_class=PlainTextResponse)
+app.add_api_route("/binary", screenshot_route, response_class=StreamingResponse)
