@@ -2,15 +2,34 @@ from typing import Optional, Union
 from io import BytesIO
 import os
 
+import sentry_sdk
 from pydantic import HttpUrl
 from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse, StreamingResponse
+from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from screenshooter.screenshot import Screenshot
 from screenshooter.schemas import BrowserSettings
 
+sentry_dsn = os.getenv("SENTRY_DSN", False)
+if sentry_dsn:
+    sentry_sdk.init(
+        dsn=sentry_dsn,
+        traces_sample_rate=1.0,
+        debug=os.getenv("DEBUG", False)
+    )
 
-app = FastAPI(docs_url=os.getenv("DOCS_URL", None))
+app = FastAPI(
+    title="screenshooter",
+    debug=os.getenv("DEBUG", False),
+    docs_url=os.getenv("DOCS_URL", None)
+)
+if sentry_dsn:
+    app.add_middleware(SentryAsgiMiddleware)
+
+# fix nginx issues
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 
 @app.get("/base64", response_class=PlainTextResponse)
