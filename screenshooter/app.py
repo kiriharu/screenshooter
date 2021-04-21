@@ -6,11 +6,14 @@ import sentry_sdk
 from pydantic import HttpUrl
 from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse, StreamingResponse
+from pyppeteer.errors import PageError
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from screenshooter.screenshot import Screenshot
 from screenshooter.schemas import BrowserSettings
+
+from screenshooter.errors import page_error_handler
 
 sentry_dsn = os.getenv("SENTRY_DSN", False)
 if sentry_dsn:
@@ -64,3 +67,5 @@ async def file(
     ))
     binary = await screenshot.binary()
     return StreamingResponse(content=BytesIO(binary), media_type="image/png")
+
+app.add_exception_handler(PageError, page_error_handler)
