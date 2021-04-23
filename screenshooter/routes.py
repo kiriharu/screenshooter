@@ -3,10 +3,10 @@ from io import BytesIO
 
 from pydantic import HttpUrl
 from fastapi import Query, Request
-from fastapi.responses import PlainTextResponse, StreamingResponse, Response
+from fastapi.responses import PlainTextResponse, StreamingResponse, Response, JSONResponse
 
 from screenshooter.screenshot import Screenshot
-from screenshooter.schemas import BrowserSettings
+from screenshooter.schemas import BrowserSettings, Base64Response, ResponseSchema
 
 
 async def screenshot_route(
@@ -18,7 +18,6 @@ async def screenshot_route(
         deviceScaleFactor: Optional[Union[int, float]] = 1,
         isLandscape: Optional[bool] = False,
 ) -> Response:
-
     screenshot = Screenshot(str(url), BrowserSettings(
         width=width, height=height, isMobile=isMobile,
         deviceScaleFactor=deviceScaleFactor, isLandscape=isLandscape
@@ -26,7 +25,11 @@ async def screenshot_route(
 
     if request.url.path == "/base64":
         plaintext = await screenshot.base64()
-        return PlainTextResponse(plaintext)
+        return JSONResponse(ResponseSchema[Base64Response](
+            data=Base64Response(
+                base64=plaintext
+            )
+        ))
     if request.url.path == "/binary":
         binary = await screenshot.binary()
         return StreamingResponse(content=BytesIO(binary), media_type="image/png")
