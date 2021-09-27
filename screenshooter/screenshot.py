@@ -1,4 +1,5 @@
 import asyncio
+from typing import Optional
 
 from pyppeteer import connect
 from pyppeteer.browser import BrowserContext
@@ -13,6 +14,7 @@ class Screenshot:
     def __init__(self, url: str, settings: BrowserSettings):
         self.url = url
         self.settings = settings
+        self.context: Optional[BrowserContext]
 
     async def __aenter__(self):
         browser = await connect(
@@ -25,9 +27,11 @@ class Screenshot:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.context.close()
         if exc_val:
-            raise
+            raise ValueError
 
     async def get_page(self) -> Page:
+        if not self.context:
+            raise AttributeError("context not found, use with context manager")
         page = await self.context.newPage()
         await page.goto(self.url)
         await asyncio.sleep(WAIT_FOR_LOAD)
