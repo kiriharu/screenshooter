@@ -4,30 +4,30 @@ services:
   chromium:
     image: zenika/alpine-chrome:latest
     command: [
-    "/usr/bin/google-chrome", \
-    "--headless", \
-    "--no-sandbox", \
-    "--disable-gpu", \
-    "--remote-debugging-address=0.0.0.0", \
-    "--remote-debugging-port=9222", \
-    "--use-mock-keychain", \
-    "--password-store=basic", \
-    "--disable-dev-shm-usage", \
-    "--test-type=webdriver", \
-    "--enable-automation", \
-    "--disable-hang-monitor", \
-    "--disable-background-networking", \
-    "--disable-default-apps", \
-    "--disable-extensions", \
-    "--disable-sync", \
-    "--disable-web-resources", \
-    "--disable-notifications", \
-    "--disable-translate", \
-    "--hide-scrollbars", \
-    "--metrics-recording-only", \
-    "--mute-audio", \
-    "--no-first-run", \
-    "--safebrowsing-disable-auto-update", \
+    chromium-browser,
+    "--headless",
+    "--no-sandbox",
+    "--disable-gpu",
+    "--remote-debugging-address=0.0.0.0",
+    "--remote-debugging-port=9222",
+    "--use-mock-keychain",
+    "--password-store=basic",
+    "--disable-dev-shm-usage",
+    "--test-type=webdriver",
+    "--enable-automation",
+    "--disable-hang-monitor",
+    "--disable-background-networking",
+    "--disable-default-apps",
+    "--disable-extensions",
+    "--disable-sync",
+    "--disable-web-resources",
+    "--disable-notifications",
+    "--disable-translate",
+    "--hide-scrollbars",
+    "--metrics-recording-only",
+    "--mute-audio",
+    "--no-first-run",
+    "--safebrowsing-disable-auto-update"
     ]
     security_opt:
       - seccomp:chrome.json
@@ -36,6 +36,8 @@ services:
 
   api:
     build:
-      context: screenshooter
+      context: .
     ports:
       - "1234:8001"
+    depends_on:
+      - chromium
