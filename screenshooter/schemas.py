@@ -8,8 +8,9 @@ DataT = TypeVar('DataT')
 
 
 class Error(str, Enum):
-    NotResolved = "not_resolved_error"
+    NotResolved = "request.not_resolved"
     HTTPException = "http.exception"
+    UnprocessableEntity = "http.unprocessable_entity"
 
 
 class ErrorResponse(BaseModel):

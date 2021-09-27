@@ -1,12 +1,12 @@
-from typing import Optional, Union
 from io import BytesIO
+from typing import Optional, Union
 
-from pydantic import HttpUrl
 from fastapi import Query, Request
-from fastapi.responses import PlainTextResponse, StreamingResponse, Response, JSONResponse
+from fastapi.responses import StreamingResponse, Response, JSONResponse
+from pydantic import HttpUrl
 
-from screenshooter.screenshot import Screenshot
 from screenshooter.schemas import BrowserSettings, Base64Response, ResponseSchema
+from screenshooter.screenshot import Screenshot
 
 
 async def screenshot_route(
@@ -18,18 +18,18 @@ async def screenshot_route(
         deviceScaleFactor: Optional[Union[int, float]] = 1,
         isLandscape: Optional[bool] = False,
 ) -> Response:
-    screenshot = Screenshot(str(url), BrowserSettings(
+    screenshot_obj = Screenshot(str(url), BrowserSettings(
         width=width, height=height, isMobile=isMobile,
         deviceScaleFactor=deviceScaleFactor, isLandscape=isLandscape
     ))
-
-    if request.url.path == "/base64":
-        plaintext = await screenshot.base64()
-        return JSONResponse(ResponseSchema[Base64Response](
-            data=Base64Response(
-                base64=plaintext
-            )
-        ))
-    if request.url.path == "/binary":
-        binary = await screenshot.binary()
-        return StreamingResponse(content=BytesIO(binary), media_type="image/png")
+    async with screenshot_obj as s:
+        if request.url.path == "/base64":
+            plaintext = await s.get_base64_screenshot()
+            return JSONResponse(ResponseSchema[Base64Response](
+                data=Base64Response(
+                    base64=plaintext
+                )
+            ).dict())
+        if request.url.path == "/binary":
+            binary = await s.get_binary_screenshot()
+            return StreamingResponse(content=BytesIO(binary), media_type="image/png")
