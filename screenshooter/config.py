@@ -7,4 +7,4 @@ try:
 except socket.gaierror:
     CHROME_IP = '127.0.0.1'
 CHROME_ADDRESS = f"http://{CHROME_IP}:9222"
-WAIT_FOR_LOAD = int(os.getenv("WAIT_FOR_LOAD", 10))
+WAIT_FOR_LOAD = int(os.getenv("WAIT_FOR_LOAD", 1))
