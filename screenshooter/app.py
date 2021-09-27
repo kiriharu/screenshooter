@@ -17,7 +17,7 @@ from screenshooter.errors import (
 from screenshooter.schemas import Base64Response, ResponseSchema
 from screenshooter.routes import screenshot_route
 
-sentry_dsn = os.getenv("SENTRY_DSN", False)
+sentry_dsn = os.getenv("SENTRY_DSN", None)
 if sentry_dsn:
     sentry_sdk.init(
         dsn=sentry_dsn,
