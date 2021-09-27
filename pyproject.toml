@@ -6,7 +6,7 @@ authors = ["kiriharu <kiriharu@yandex.ru>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-fastapi = "^0.63.0"
+fastapi = "^0.65.2"
 pyppeteer = "^0.2.5"
 uvicorn = "^0.13.4"
 sentry-sdk = "^1.0.0"
