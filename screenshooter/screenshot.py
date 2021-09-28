@@ -1,4 +1,5 @@
 import asyncio
+from enum import Enum
 from typing import Optional
 
 from pyppeteer import connect
@@ -9,11 +10,17 @@ from screenshooter.schemas import BrowserSettings
 from screenshooter.config import CHROME_ADDRESS, WAIT_FOR_LOAD
 
 
+class PicType(str, Enum):
+    jpeg = "jpeg"
+    png = "png"
+
+
 class Screenshot:
 
-    def __init__(self, url: str, settings: BrowserSettings):
+    def __init__(self, url: str, settings: BrowserSettings, pic_type: PicType):
         self.url = url
         self.settings = settings
+        self.pic_type = pic_type
         self.context: Optional[BrowserContext]
 
     async def __aenter__(self):
@@ -37,12 +44,7 @@ class Screenshot:
         await asyncio.sleep(WAIT_FOR_LOAD)
         return page
 
-    async def get_base64_screenshot(self) -> str:
-        return await (
-            await self.get_page()
-        ).screenshot(encoding="base64", type="jpeg")
-
     async def get_binary_screenshot(self) -> bytes:
         return await (
             await self.get_page()
-        ).screenshot(type="jpeg")
+        ).screenshot(type=self.pic_type.value)
