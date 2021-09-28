@@ -14,9 +14,9 @@ main_router = APIRouter()
 @main_router.get("/screenshot")
 async def screenshoot(
     url: HttpUrl,
-    pic_type: PicType,
-    width: Optional[int] = Query(800, lt=2000),
-    height: Optional[int] = Query(600, lt=2000),
+    pic_type: PicType = Query(PicType.jpeg),
+    width: Optional[int] = Query(800, ge=800, le=2000),
+    height: Optional[int] = Query(600, ge=600, le=2000),
     isMobile: Optional[bool] = False,
     deviceScaleFactor: Optional[Union[int, float]] = 1,
     isLandscape: Optional[bool] = False,
