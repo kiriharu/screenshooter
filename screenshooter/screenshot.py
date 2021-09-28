@@ -37,11 +37,6 @@ class Screenshot:
         await asyncio.sleep(WAIT_FOR_LOAD)
         return page
 
-    async def get_base64_screenshot(self) -> str:
-        return await (
-            await self.get_page()
-        ).screenshot(encoding="base64", type="jpeg")
-
     async def get_binary_screenshot(self) -> bytes:
         return await (
             await self.get_page()

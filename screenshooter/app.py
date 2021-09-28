@@ -4,18 +4,16 @@ import sentry_sdk
 from fastapi import FastAPI
 from pyppeteer.errors import PageError, BrowserError
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
-from starlette.responses import JSONResponse, StreamingResponse
 from fastapi.exceptions import RequestValidationError
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from starlette.exceptions import HTTPException
 
+from screenshooter.routes import main_router
 from screenshooter.errors import (
     page_error_handler,
     http_exception_handler,
     request_validation_exception_handler
 )
-from screenshooter.schemas import Base64Response, ResponseSchema
-from screenshooter.routes import screenshot_route
 
 sentry_dsn = os.getenv("SENTRY_DSN", None)
 if sentry_dsn:
@@ -41,9 +39,5 @@ app.add_exception_handler(PageError, page_error_handler)
 app.add_exception_handler(BrowserError, page_error_handler)
 app.add_exception_handler(HTTPException, http_exception_handler)
 app.add_exception_handler(RequestValidationError, request_validation_exception_handler)
-app.add_api_route(
-    "/base64", screenshot_route,
-    response_class=JSONResponse,
-    response_model=ResponseSchema[Base64Response]
-)
-app.add_api_route("/binary", screenshot_route, response_class=StreamingResponse)
+
+app.include_router(main_router)

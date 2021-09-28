@@ -24,10 +24,6 @@ class ResponseSchema(GenericModel, Generic[DataT]):
     error: Optional[ErrorResponse]
 
 
-class Base64Response(BaseModel):
-    base64: str
-
-
 class BrowserSettings(BaseModel):
     width: int
     height: int
