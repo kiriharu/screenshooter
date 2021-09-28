@@ -6,7 +6,7 @@ from fastapi import HTTPException
 
 from screenshooter.config import RESTRICTED_HOSTS
 
-restricted_address_exc = HTTPException(status_code=400, detail="Restricted address")
+restricted_address_exc = HTTPException(status_code=403, detail="Restricted address")
 
 
 def check_restricted_urls(url: HttpUrl):
