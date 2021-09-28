@@ -1,11 +1,12 @@
 from io import BytesIO
 from typing import Optional, Union
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from pydantic import HttpUrl
 from starlette.responses import StreamingResponse
 
 from screenshooter.schemas import BrowserSettings
+from screenshooter.di import check_restricted_urls
 from screenshooter.screenshot import Screenshot, PicType
 
 main_router = APIRouter()
@@ -13,7 +14,7 @@ main_router = APIRouter()
 
 @main_router.get("/screenshot")
 async def screenshoot(
-    url: HttpUrl,
+    url: HttpUrl = Depends(check_restricted_urls),
     pic_type: PicType = Query(PicType.jpeg),
     width: Optional[int] = Query(800, ge=800, le=2000),
     height: Optional[int] = Query(600, ge=600, le=2000),
