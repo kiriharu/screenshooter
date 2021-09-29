@@ -1,8 +1,9 @@
 import os
+from functools import partial
 
 import sentry_sdk
 from fastapi import FastAPI
-from pyppeteer.errors import PageError, BrowserError
+from pyppeteer.errors import PageError, BrowserError, NetworkError
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
@@ -33,5 +34,9 @@ app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 app.add_exception_handler(PageError, page_error_handler)
 app.add_exception_handler(BrowserError, page_error_handler)
+app.add_exception_handler(
+    NetworkError,
+    partial(page_error_handler, details="Network error. Check resource or cookies")
+)
 
 app.include_router(main_router)
