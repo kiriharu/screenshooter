@@ -17,10 +17,17 @@ class PicType(str, Enum):
 
 class Screenshot:
 
-    def __init__(self, url: str, settings: BrowserSettings, pic_type: PicType):
+    def __init__(
+        self,
+        url: str,
+        settings: BrowserSettings,
+        pic_type: PicType,
+        enable_javascript: bool,
+    ):
         self.url = url
         self.settings = settings
         self.pic_type = pic_type
+        self.enable_javascript = enable_javascript
         self.context: Optional[BrowserContext]
 
     async def __aenter__(self):
@@ -40,6 +47,7 @@ class Screenshot:
         if not self.context:
             raise AttributeError("context not found, use with context manager")
         page = await self.context.newPage()
+        await page.setJavaScriptEnabled(self.enable_javascript)
         await page.goto(self.url)
         await asyncio.sleep(WAIT_FOR_LOAD)
         return page

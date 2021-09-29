@@ -21,11 +21,18 @@ async def screenshoot(
     isMobile: Optional[bool] = False,
     deviceScaleFactor: Optional[Union[int, float]] = 1,
     isLandscape: Optional[bool] = False,
+    enable_javascript: Optional[bool] = True
 ) -> StreamingResponse:
-    screenshot_obj = Screenshot(str(url), BrowserSettings(
+    browser_settings = BrowserSettings(
         width=width, height=height, isMobile=isMobile,
         deviceScaleFactor=deviceScaleFactor, isLandscape=isLandscape
-    ), pic_type)
+    )
+    screenshot_obj = Screenshot(
+        str(url),
+        browser_settings,
+        pic_type,
+        enable_javascript,
+    )
     async with screenshot_obj as s:
         binary = await s.get_binary_screenshot()
         return StreamingResponse(content=BytesIO(binary), media_type=f"image/{pic_type.value}")
