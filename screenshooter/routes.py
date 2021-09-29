@@ -1,7 +1,7 @@
 from io import BytesIO
-from typing import Optional, Union
+from typing import Optional, Union, Any
 
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Query, Depends, Body
 from pydantic import HttpUrl
 from starlette.responses import StreamingResponse
 
@@ -12,7 +12,7 @@ from screenshooter.screenshot import Screenshot, PicType
 main_router = APIRouter()
 
 
-@main_router.get("/screenshot")
+@main_router.post("/screenshot")
 async def screenshoot(
     url: HttpUrl = Depends(check_restricted_urls),
     pic_type: PicType = Query(PicType.jpeg),
@@ -21,7 +21,8 @@ async def screenshoot(
     isMobile: Optional[bool] = False,
     deviceScaleFactor: Optional[Union[int, float]] = 1,
     isLandscape: Optional[bool] = False,
-    enable_javascript: Optional[bool] = True
+    enable_javascript: Optional[bool] = True,
+    cookies: Optional[dict[str, Any]] = Body(default={}),
 ) -> StreamingResponse:
     browser_settings = BrowserSettings(
         width=width, height=height, isMobile=isMobile,
@@ -32,6 +33,7 @@ async def screenshoot(
         browser_settings,
         pic_type,
         enable_javascript,
+        cookies
     )
     async with screenshot_obj as s:
         binary = await s.get_binary_screenshot()
