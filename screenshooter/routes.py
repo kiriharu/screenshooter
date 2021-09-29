@@ -23,6 +23,7 @@ async def screenshoot(
     isLandscape: Optional[bool] = False,
     enable_javascript: Optional[bool] = True,
     cookies: Optional[dict[str, Any]] = Body(default={}),
+    useragent: Optional[str] = None,
 ) -> StreamingResponse:
     browser_settings = BrowserSettings(
         width=width, height=height, isMobile=isMobile,
@@ -33,7 +34,8 @@ async def screenshoot(
         browser_settings,
         pic_type,
         enable_javascript,
-        cookies
+        cookies,
+        useragent
     )
     async with screenshot_obj as s:
         binary = await s.get_binary_screenshot()

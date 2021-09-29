@@ -36,7 +36,8 @@ class Screenshot:
         settings: BrowserSettings,
         pic_type: PicType,
         enable_javascript: bool,
-        cookies: dict[str, Any]
+        cookies: dict[str, Any],
+        useragent: Optional[str],
     ):
         self.url = url
         self.settings = settings
@@ -44,6 +45,7 @@ class Screenshot:
         self.enable_javascript = enable_javascript
         self.cookies = cookies
         self.context: Optional[BrowserContext]
+        self.useragent = useragent
 
     async def __aenter__(self):
         browser = await connect(
@@ -62,6 +64,8 @@ class Screenshot:
         if not self.context:
             raise AttributeError("context not found, use with context manager")
         page = await self.context.newPage()
+        if self.useragent:
+            await page.setUserAgent(self.useragent)
         await page.setJavaScriptEnabled(self.enable_javascript)
         await page.setCookie(*prepare_cookies(self.cookies, self.url))
         await page.goto(self.url)
