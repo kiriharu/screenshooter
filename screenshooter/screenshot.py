@@ -14,6 +14,25 @@ class PicType(str, Enum):
     png = "png"
 
 
+def to_hashable(item: Any):
+    if hasattr(item, "dict"):
+        yield from to_hashable(list(sorted(item.dict().items())))
+    elif isinstance(item, dict):
+        yield from to_hashable(list(sorted(item.items())))
+    elif isinstance(item, list):
+        while item:
+            yield from to_hashable(item.pop())
+    else:
+        yield item
+
+
+def get_hash_from_args(args: dict):
+    items = set()
+    for v in to_hashable(list(args.values())):
+        items.add(v)
+    return hash(frozenset(items))
+
+
 def prepare_cookies(cookies: dict[str, Any], url: str) -> list[dict[str, Any]]:
     prepared = []
     for cookie_key in cookies.keys():
@@ -39,6 +58,11 @@ class Screenshot:
         cookies: dict[str, Any],
         useragent: Optional[str],
     ):
+
+        loc = locals().copy()
+        del loc['self']
+        del loc['browser']
+
         self.browser = browser
         self.url = url
         self.viewport = viewport
