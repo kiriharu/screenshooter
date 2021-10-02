@@ -5,7 +5,7 @@ from pydantic import BaseModel
 DataT = TypeVar('DataT')
 
 
-class BrowserSettings(BaseModel):
+class Viewport(BaseModel):
     width: int
     height: int
     deviceScaleFactor: Union[int, float]

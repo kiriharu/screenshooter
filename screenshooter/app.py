@@ -3,10 +3,12 @@ from functools import partial
 
 import sentry_sdk
 from fastapi import FastAPI
+from pyppeteer import connect
 from pyppeteer.errors import PageError, BrowserError, NetworkError
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
+from screenshooter.config import CHROME_ADDRESS
 from screenshooter.routes import main_router
 from screenshooter.errors import (
     page_error_handler,
@@ -38,5 +40,13 @@ app.add_exception_handler(
     NetworkError,
     partial(page_error_handler, details="Network error. Check resource or cookies")
 )
+
+
+@app.on_event("startup")
+async def on_startup():
+    browser = await connect(
+        browserURL=CHROME_ADDRESS
+    )
+    app.state.browser = browser
 
 app.include_router(main_router)

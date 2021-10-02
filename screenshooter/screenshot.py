@@ -2,12 +2,11 @@ import asyncio
 from enum import Enum
 from typing import Optional, Any
 
-from pyppeteer import connect
-from pyppeteer.browser import BrowserContext
+from pyppeteer.browser import BrowserContext, Browser
 from pyppeteer.page import Page
 
-from screenshooter.schemas import BrowserSettings
-from screenshooter.config import CHROME_ADDRESS, WAIT_FOR_LOAD
+from screenshooter.schemas import Viewport
+from screenshooter.config import WAIT_FOR_LOAD
 
 
 class PicType(str, Enum):
@@ -32,15 +31,17 @@ class Screenshot:
 
     def __init__(
         self,
+        browser: Browser,
         url: str,
-        settings: BrowserSettings,
+        viewport: Viewport,
         pic_type: PicType,
         enable_javascript: bool,
         cookies: dict[str, Any],
         useragent: Optional[str],
     ):
+        self.browser = browser
         self.url = url
-        self.settings = settings
+        self.viewport = viewport
         self.pic_type = pic_type
         self.enable_javascript = enable_javascript
         self.cookies = cookies
@@ -48,11 +49,7 @@ class Screenshot:
         self.useragent = useragent
 
     async def __aenter__(self):
-        browser = await connect(
-            browserURL=CHROME_ADDRESS,
-            **dict(defaultViewport=self.settings.dict())
-        )
-        self.context: BrowserContext = await browser.createIncognitoBrowserContext()
+        self.context: BrowserContext = await self.browser.createIncognitoBrowserContext()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -66,6 +63,7 @@ class Screenshot:
         page = await self.context.newPage()
         if self.useragent:
             await page.setUserAgent(self.useragent)
+        await page.setViewport(self.viewport.dict())
         await page.setJavaScriptEnabled(self.enable_javascript)
         await page.setCookie(*prepare_cookies(self.cookies, self.url))
         await page.goto(self.url)
