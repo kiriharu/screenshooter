@@ -1,9 +1,8 @@
-from io import BytesIO
 from typing import Optional, Union, Any
 
 from fastapi import APIRouter, Query, Depends, Body, Request
 from pydantic import HttpUrl
-from starlette.responses import FileResponse
+from starlette.responses import JSONResponse
 
 from screenshooter.schemas import Viewport
 from screenshooter.di import check_restricted_urls
@@ -25,7 +24,7 @@ async def screenshoot(
     enable_javascript: Optional[bool] = True,
     cookies: Optional[dict[str, Any]] = Body(default={}),
     useragent: Optional[str] = None,
-) -> FileResponse:
+) -> JSONResponse:
     browser_settings = Viewport(
         width=width, height=height, isMobile=isMobile,
         deviceScaleFactor=deviceScaleFactor, isLandscape=isLandscape
@@ -41,5 +40,5 @@ async def screenshoot(
         useragent
     )
     async with screenshot_obj as s:
-        path = await s.get_screenshot_path()
-        return FileResponse(path, media_type=f"image/{pic_type.value}")
+        path = await s.get_screenshot()
+        return JSONResponse(dict(url=path[0], ttl=path[1]))
