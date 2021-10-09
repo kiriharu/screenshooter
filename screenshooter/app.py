@@ -8,7 +8,8 @@ from pyppeteer.errors import PageError, BrowserError, NetworkError
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
-from screenshooter.config import CHROME_ADDRESS
+from screenshooter.cache import Cache
+from screenshooter.config import CHROME_ADDRESS, SCREENSHOT_CACHE_TTL
 from screenshooter.routes import main_router
 from screenshooter.errors import (
     page_error_handler,
@@ -44,9 +45,9 @@ app.add_exception_handler(
 
 @app.on_event("startup")
 async def on_startup():
-    browser = await connect(
-        browserURL=CHROME_ADDRESS
-    )
+    browser = await connect(browserURL=CHROME_ADDRESS)
     app.state.browser = browser
+    cache = Cache(SCREENSHOT_CACHE_TTL)
+    app.state.scr_cache = cache
 
 app.include_router(main_router)

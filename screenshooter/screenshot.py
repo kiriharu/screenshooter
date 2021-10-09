@@ -1,12 +1,14 @@
 import asyncio
 from enum import Enum
 from typing import Optional, Any
+from pathlib import Path
 
 from pyppeteer.browser import BrowserContext, Browser
 from pyppeteer.page import Page
 
+from screenshooter.cache import Cache
 from screenshooter.schemas import Viewport
-from screenshooter.config import WAIT_FOR_LOAD
+from screenshooter.config import WAIT_FOR_LOAD, SCREENSHOTS_DIR
 
 
 class PicType(str, Enum):
@@ -51,6 +53,7 @@ class Screenshot:
     def __init__(
         self,
         browser: Browser,
+        scr_cache: Cache,
         url: str,
         viewport: Viewport,
         pic_type: PicType,
@@ -62,8 +65,10 @@ class Screenshot:
         loc = locals().copy()
         del loc['self']
         del loc['browser']
-
+        del loc['scr_cache']
+        self.hash = get_hash_from_args(loc)
         self.browser = browser
+        self.scr_cache: Cache = scr_cache
         self.url = url
         self.viewport = viewport
         self.pic_type = pic_type
@@ -94,7 +99,12 @@ class Screenshot:
         await asyncio.sleep(WAIT_FOR_LOAD)
         return page
 
-    async def get_binary_screenshot(self) -> bytes:
-        return await (
-            await self.get_page()
-        ).screenshot(type=self.pic_type.value)
+    async def get_screenshot_path(self) -> str:
+        Path(SCREENSHOTS_DIR).mkdir(parents=True, exist_ok=True)  # ensure dir exists
+        _path = f"{SCREENSHOTS_DIR}/{self.hash}.{self.pic_type.value}"
+        cached = self.scr_cache.get(self.hash)
+        if not cached:
+            await (await self.get_page()).screenshot(type=self.pic_type.value, path=_path)
+            return _path
+        else:
+            return _path
