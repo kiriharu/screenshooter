@@ -2,7 +2,7 @@ from typing import Union, TypeVar
 
 from pydantic import BaseModel
 
-DataT = TypeVar('DataT')
+DataT = TypeVar("DataT")
 
 
 class Viewport(BaseModel):
@@ -11,4 +11,3 @@ class Viewport(BaseModel):
     deviceScaleFactor: Union[int, float]
     isMobile: bool
     isLandscape: bool
-

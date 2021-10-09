@@ -38,18 +38,11 @@ def get_hash_from_args(args: dict):
 def prepare_cookies(cookies: dict[str, Any], url: str) -> list[dict[str, Any]]:
     prepared = []
     for cookie_key in cookies.keys():
-        prepared.append(
-            {
-                'name': cookie_key,
-                'value': cookies[cookie_key],
-                'url': url
-            }
-        )
+        prepared.append({"name": cookie_key, "value": cookies[cookie_key], "url": url})
     return prepared
 
 
 class Screenshot:
-
     def __init__(
         self,
         browser: Browser,
@@ -63,9 +56,9 @@ class Screenshot:
     ):
 
         loc = locals().copy()
-        del loc['self']
-        del loc['browser']
-        del loc['scr_cache']
+        del loc["self"]
+        del loc["browser"]
+        del loc["scr_cache"]
         self.hash = get_hash_from_args(loc)
         self.browser = browser
         self.scr_cache: Cache = scr_cache
@@ -78,7 +71,9 @@ class Screenshot:
         self.useragent = useragent
 
     async def __aenter__(self):
-        self.context: BrowserContext = await self.browser.createIncognitoBrowserContext()
+        self.context: BrowserContext = (
+            await self.browser.createIncognitoBrowserContext()
+        )
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -106,7 +101,9 @@ class Screenshot:
         ttl = int(cached.end_time - time.time())
         pub_path = f"{SCREENSHOTS_STATIC_DIR}/{filename}"
         if not cached.created:
-            await (await self.get_page()).screenshot(type=self.pic_type.value, path=path)
+            await (await self.get_page()).screenshot(
+                type=self.pic_type.value, path=path
+            )
             return pub_path, ttl
         else:
             return pub_path, ttl

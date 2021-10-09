@@ -26,8 +26,11 @@ async def screenshoot(
     useragent: Optional[str] = None,
 ) -> JSONResponse:
     browser_settings = Viewport(
-        width=width, height=height, isMobile=isMobile,
-        deviceScaleFactor=deviceScaleFactor, isLandscape=isLandscape
+        width=width,
+        height=height,
+        isMobile=isMobile,
+        deviceScaleFactor=deviceScaleFactor,
+        isLandscape=isLandscape,
     )
     screenshot_obj = Screenshot(
         request.app.state.browser,
@@ -37,7 +40,7 @@ async def screenshoot(
         pic_type,
         enable_javascript,
         cookies,
-        useragent
+        useragent,
     )
     async with screenshot_obj as s:
         path = await s.get_screenshot()

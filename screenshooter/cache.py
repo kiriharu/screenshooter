@@ -8,7 +8,6 @@ class Result(NamedTuple):
 
 
 class Cache:
-
     def __init__(self, ttl: int):
         self.ttl = ttl
         self.storage: dict[int, int] = {}

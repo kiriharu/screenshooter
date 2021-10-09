@@ -13,8 +13,10 @@ from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from screenshooter.cache import Cache
 from screenshooter.config import (
-    CHROME_ADDRESS, SCREENSHOT_CACHE_TTL,
-    SCREENSHOTS_STATIC_DIR, SCREENSHOTS_DIR
+    CHROME_ADDRESS,
+    SCREENSHOT_CACHE_TTL,
+    SCREENSHOTS_STATIC_DIR,
+    SCREENSHOTS_DIR,
 )
 from screenshooter.routes import main_router
 from screenshooter.errors import (
@@ -24,9 +26,7 @@ from screenshooter.errors import (
 sentry_dsn = os.getenv("SENTRY_DSN", None)
 if sentry_dsn:
     sentry_sdk.init(
-        dsn=sentry_dsn,
-        traces_sample_rate=1.0,
-        debug=os.getenv("DEBUG", False)
+        dsn=sentry_dsn, traces_sample_rate=1.0, debug=os.getenv("DEBUG", False)
     )
 
 app = FastAPI(
@@ -45,7 +45,7 @@ app.add_exception_handler(PageError, page_error_handler)
 app.add_exception_handler(BrowserError, page_error_handler)
 app.add_exception_handler(
     NetworkError,
-    partial(page_error_handler, details="Network error. Check resource or cookies")
+    partial(page_error_handler, details="Network error. Check resource or cookies"),
 )
 
 
@@ -57,12 +57,13 @@ async def on_startup():
     app.state.scr_cache = cache
     # remove data in SCREENSHOTS_DIR
     Path(SCREENSHOTS_DIR).mkdir(parents=True, exist_ok=True)  # ensure dir exists
-    for file in glob.glob(os.path.join(SCREENSHOTS_DIR, '*')):
+    for file in glob.glob(os.path.join(SCREENSHOTS_DIR, "*")):
         os.remove(file)
+
 
 app.include_router(main_router)
 app.mount(
     f"/{SCREENSHOTS_STATIC_DIR}",
     StaticFiles(directory=SCREENSHOTS_STATIC_DIR),
-    name=SCREENSHOTS_STATIC_DIR
+    name=SCREENSHOTS_STATIC_DIR,
 )
