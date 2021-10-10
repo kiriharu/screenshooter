@@ -1,12 +1,11 @@
-from fastapi import Request
-from fastapi.responses import JSONResponse
-from pyppeteer.errors import PyppeteerError
-from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
+from urllib.request import Request
+
+from fastapi.encoders import jsonable_encoder
+from starlette.responses import JSONResponse
+from screenshooter.schemas import Error
 
 
-async def page_error_handler(
-    request: Request, exc: PyppeteerError, details: str = "Resource not resolved"
+async def exception_handler(
+    request: Request, err: Exception, errors: list[Error], status_code: int
 ) -> JSONResponse:
-    return JSONResponse(
-        dict(details=details), status_code=HTTP_422_UNPROCESSABLE_ENTITY
-    )
+    return JSONResponse({"detail": jsonable_encoder(errors)}, status_code=status_code)

@@ -1,6 +1,7 @@
 import os
 import glob
 from functools import partial
+
 from pathlib import Path
 
 import sentry_sdk
@@ -19,9 +20,8 @@ from screenshooter.config import (
     SCREENSHOTS_DIR,
 )
 from screenshooter.routes import main_router
-from screenshooter.errors import (
-    page_error_handler,
-)
+from screenshooter.schemas import Error, ErrorType
+from screenshooter.errors import exception_handler
 
 sentry_dsn = os.getenv("SENTRY_DSN", None)
 if sentry_dsn:
@@ -31,7 +31,7 @@ if sentry_dsn:
 
 app = FastAPI(
     title="screenshooter",
-    debug=os.getenv("DEBUG", False),
+    debug=bool(int(os.getenv("DEBUG", False))),
     redoc_url=os.getenv("REDOCK_URL", None),
     docs_url=os.getenv("DOCS_URL", None),
 )
@@ -41,12 +41,30 @@ if sentry_dsn:
 # fix nginx issues
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
-app.add_exception_handler(PageError, page_error_handler)
-app.add_exception_handler(BrowserError, page_error_handler)
+app.add_exception_handler(
+    PageError,
+    partial(
+        exception_handler,
+        errors=[Error(msg="Page error", type=ErrorType.PageError)],
+        status_code=422,
+    ),
+),
+app.add_exception_handler(
+    BrowserError,
+    partial(
+        exception_handler,
+        errors=[Error(msg="Browser error", type=ErrorType.BrowserError)],
+        status_code=422,
+    ),
+)
 app.add_exception_handler(
     NetworkError,
-    partial(page_error_handler, details="Network error. Check resource or cookies"),
-)
+    partial(
+        exception_handler,
+        errors=[Error(msg="Network error or invalid cookies", type=ErrorType.NetworkError)],
+        status_code=400,
+    ),
+),
 
 
 @app.on_event("startup")
@@ -67,3 +85,4 @@ app.mount(
     StaticFiles(directory=SCREENSHOTS_STATIC_DIR),
     name=SCREENSHOTS_STATIC_DIR,
 )
+
