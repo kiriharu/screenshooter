@@ -11,6 +11,7 @@ class ErrorType(str, Enum):
     BrowserError = "screenshooter.chrome.page_error"
     NetworkError = "screenshooter.chrome.network_error"
     RestrictedAddress = "screenshooter.restricted_address"
+    InvalidToken = "screenshooter.invalid_token"
 
 
 class Error(BaseModel):

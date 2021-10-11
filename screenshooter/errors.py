@@ -16,6 +16,10 @@ class RestrictedAddressException(ScreenshooterException):
     pass
 
 
+class InvalidTokenException(ScreenshooterException):
+    pass
+
+
 async def exception_handler(
     request: Request, err: Exception, errors: list[Error], status_code: int
 ) -> JSONResponse:
@@ -47,4 +51,8 @@ def add_exception_handlers(app: FastAPI):
     app.add_exception_handler(
         ScreenshooterException,
         _exc([Error(msg="Restricted Address", type=ErrorType.RestrictedAddress)], 403),
+    )
+    app.add_exception_handler(
+        InvalidTokenException,
+        _exc([Error(msg="Invalid token", type=ErrorType.InvalidToken)], 403),
     )

@@ -1,10 +1,11 @@
 from contextlib import suppress
 from ipaddress import ip_address
 
+from fastapi import Header
 from pydantic import HttpUrl
 
-from screenshooter.config import RESTRICTED_HOSTS
-from screenshooter.errors import RestrictedAddressException
+from screenshooter.config import RESTRICTED_HOSTS, ACCESS_TOKEN
+from screenshooter.errors import RestrictedAddressException, InvalidTokenException
 
 
 def check_restricted_urls(url: HttpUrl):
@@ -26,3 +27,8 @@ def check_restricted_urls(url: HttpUrl):
     if url.host in RESTRICTED_HOSTS:
         raise RestrictedAddressException()
     return url
+
+
+def verify_token(x_token: str = Header(...)):
+    if x_token != ACCESS_TOKEN:
+        raise InvalidTokenException

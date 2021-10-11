@@ -4,7 +4,7 @@ import glob
 from pathlib import Path
 
 import sentry_sdk
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.staticfiles import StaticFiles
 from pyppeteer import connect
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
@@ -19,6 +19,7 @@ from screenshooter.config import (
 )
 from screenshooter.routes import main_router
 from screenshooter.errors import add_exception_handlers
+from screenshooter.di import verify_token
 
 sentry_dsn = os.getenv("SENTRY_DSN", None)
 if sentry_dsn:
@@ -31,6 +32,7 @@ app = FastAPI(
     debug=bool(int(os.getenv("DEBUG", False))),
     redoc_url=os.getenv("REDOCK_URL", None),
     docs_url=os.getenv("DOCS_URL", None),
+    dependencies=[Depends(verify_token)]
 )
 if sentry_dsn:
     app.add_middleware(SentryAsgiMiddleware)
@@ -38,6 +40,7 @@ if sentry_dsn:
 # fix nginx issues
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 add_exception_handlers(app)
+
 
 @app.on_event("startup")
 async def on_startup():
