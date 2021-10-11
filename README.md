@@ -13,29 +13,24 @@ Built with pyppeteer and FastAPI.
 * Set cookies
 * Jpeg/Png format
 * Configure some viewport settings (width, height, isMobile, deviceScaleFactor, isLandscape)
+* Token auth (set in .env)
 
 ## Endpoints:
-Screenshooter has a single POST endpoint - /screenshot
+Screenshooter has a single POST endpoint - /screenshot.  
+You need to pass `url` in query and `x-token` header to make screenshot.  
+For other values you can set `DOCS_URL=/docs` to .env and get docs in /docs endpoint
 
-## Errors:
-422 http code on missing required params. Detail will show default FastAPI value_error.missing
-
-Example:  
-POST http://127.0.0.1:8000/screenshot
-
-Response:
+Default response looks like:
 ```json
 {
-  "detail": [
-    {
-      "loc": [
-        "query",
-        "url"
-      ],
-      "msg": "field required",
-      "type": "value_error.missing"
-    }
-  ]
+  "url": "data/-2881154151398968169.jpeg",
+  "ttl": 99
 }
 ```
-TODO more errors
+
+## Install
+1. Clone repo:  
+`git clone https://github.com/kiriharu/screenshooter`
+2. Copy .env.example to .env and edit
+3. Up and build with docker-compose:  
+`docker-compose up -d --build`
