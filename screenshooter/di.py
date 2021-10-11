@@ -2,11 +2,9 @@ from contextlib import suppress
 from ipaddress import ip_address
 
 from pydantic import HttpUrl
-from fastapi import HTTPException
 
 from screenshooter.config import RESTRICTED_HOSTS
-
-restricted_address_exc = HTTPException(status_code=403, detail="Restricted address")
+from screenshooter.errors import RestrictedAddressException
 
 
 def check_restricted_urls(url: HttpUrl):
@@ -23,8 +21,8 @@ def check_restricted_urls(url: HttpUrl):
                 not ip_addr.is_global,
             ]
         ):
-            raise restricted_address_exc
+            raise RestrictedAddressException()
     # restricted hosts
     if url.host in RESTRICTED_HOSTS:
-        raise restricted_address_exc
+        raise RestrictedAddressException()
     return url

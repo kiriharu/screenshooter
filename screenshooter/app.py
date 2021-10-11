@@ -1,6 +1,5 @@
 import os
 import glob
-from functools import partial
 
 from pathlib import Path
 
@@ -8,7 +7,6 @@ import sentry_sdk
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pyppeteer import connect
-from pyppeteer.errors import PageError, BrowserError, NetworkError
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
@@ -20,8 +18,7 @@ from screenshooter.config import (
     SCREENSHOTS_DIR,
 )
 from screenshooter.routes import main_router
-from screenshooter.schemas import Error, ErrorType
-from screenshooter.errors import exception_handler
+from screenshooter.errors import add_exception_handlers
 
 sentry_dsn = os.getenv("SENTRY_DSN", None)
 if sentry_dsn:
@@ -40,32 +37,7 @@ if sentry_dsn:
 
 # fix nginx issues
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
-
-app.add_exception_handler(
-    PageError,
-    partial(
-        exception_handler,
-        errors=[Error(msg="Page error", type=ErrorType.PageError)],
-        status_code=422,
-    ),
-),
-app.add_exception_handler(
-    BrowserError,
-    partial(
-        exception_handler,
-        errors=[Error(msg="Browser error", type=ErrorType.BrowserError)],
-        status_code=422,
-    ),
-)
-app.add_exception_handler(
-    NetworkError,
-    partial(
-        exception_handler,
-        errors=[Error(msg="Network error or invalid cookies", type=ErrorType.NetworkError)],
-        status_code=400,
-    ),
-),
-
+add_exception_handlers(app)
 
 @app.on_event("startup")
 async def on_startup():
