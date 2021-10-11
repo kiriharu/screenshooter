@@ -1,4 +1,4 @@
-# Screenshooter - screenshot as a service.
+# Screenshooter - site screenshoter as service 
 
 Screenshooter is a simple service that just makes screenshot of provided url.
 
