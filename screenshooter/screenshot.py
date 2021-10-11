@@ -4,6 +4,7 @@ from enum import Enum
 from typing import Optional, Any
 
 from pyppeteer.browser import BrowserContext, Browser
+from pyppeteer.errors import PyppeteerError
 from pyppeteer.page import Page
 
 from screenshooter.cache import Cache, Result
@@ -101,9 +102,14 @@ class Screenshot:
         ttl = int(cached.end_time - time.time())
         pub_path = f"{SCREENSHOTS_STATIC_DIR}/{filename}"
         if not cached.created:
-            await (await self.get_page()).screenshot(
-                type=self.pic_type.value, path=path
-            )
+            try:
+                await (await self.get_page()).screenshot(
+                    type=self.pic_type.value, path=path
+                )
+            except PyppeteerError:
+                del self.scr_cache.storage[self.hash]
+                raise
             return pub_path, ttl
         else:
             return pub_path, ttl
+
