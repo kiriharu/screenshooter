@@ -8,10 +8,11 @@ DataT = TypeVar("DataT")
 
 class ErrorType(str, Enum):
     PageError = "screenshooter.chrome.page_error"
-    BrowserError = "screenshooter.chrome.page_error"
+    BrowserError = "screenshooter.chrome.browser_error"
     NetworkError = "screenshooter.chrome.network_error"
     RestrictedAddress = "screenshooter.restricted_address"
     InvalidToken = "screenshooter.invalid_token"
+    TimeoutError = "screenshooter.chrome.timeout_error"
 
 
 class Error(BaseModel):

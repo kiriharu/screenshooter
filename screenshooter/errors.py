@@ -3,7 +3,7 @@ from urllib.request import Request
 
 from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
-from pyppeteer.errors import PageError, BrowserError, NetworkError
+from pyppeteer.errors import PageError, BrowserError, NetworkError, TimeoutError
 from starlette.responses import JSONResponse
 from screenshooter.schemas import Error, ErrorType
 
@@ -55,4 +55,7 @@ def add_exception_handlers(app: FastAPI):
     app.add_exception_handler(
         InvalidTokenException,
         _exc([Error(msg="Invalid token", type=ErrorType.InvalidToken)], 403),
+    )
+    app.add_exception_handler(
+        TimeoutError, _exc([Error(msg="Timeout", type=ErrorType.TimeoutError)], 400)
     )
