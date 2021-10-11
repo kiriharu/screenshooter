@@ -49,11 +49,10 @@ async def on_startup():
     cache = Cache(SCREENSHOT_CACHE_TTL)
     app.state.scr_cache = cache
     # remove data in SCREENSHOTS_DIR
-    Path(SCREENSHOTS_DIR).mkdir(parents=True, exist_ok=True)  # ensure dir exists
     for file in glob.glob(os.path.join(SCREENSHOTS_DIR, "*")):
         os.remove(file)
 
-
+Path(SCREENSHOTS_DIR).mkdir(parents=True, exist_ok=True)  # ensure dir exists
 app.include_router(main_router)
 app.mount(
     f"/{SCREENSHOTS_STATIC_DIR}",
